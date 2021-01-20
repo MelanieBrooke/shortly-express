@@ -1,5 +1,7 @@
 const utils = require('../lib/hashUtils');
 const Model = require('./model');
+const db = require('../db');
+const _ = require('lodash');
 
 /**
  * Users is a class with methods to interact with the users table, which
@@ -33,7 +35,51 @@ class Users extends Model {
    * @returns {Promise<Object>} A promise that is fulfilled with the result of
    * the record creation or rejected with the error that occured.
    */
+  executeQuery (query, values) {
+    return db.queryAsync(query, values).spread( (results) => results);
+  }
+
+  getAll(tablename) {
+    let queryString = `SELECT username FROM ${tablename}`;
+    return this.executeQuery(queryString);
+  }
+
+
+
+
+
   create({ username, password }) {
+
+
+
+    // check if user exists in database
+
+    // if user exists use window.location.replace("http://127.0.0.1:4568/signup");
+    // console.log('users -> ', Users);
+    //invoke getAll method on a usersTable
+
+    console.log('this = ', this);
+    console.log('username = ', username);
+
+
+    this.getAll('users')
+      .then( (data) => {
+        console.log('data -> ', data);
+        // iterate over data
+        return data.forEach( (object) => {
+          if (username === object.username) {
+            $(location).attr('href', 'http://127.0.0.1:4568/signup');
+          }
+        });
+      });
+
+    // get usernma s from above function ^^^ somehow
+
+    // if username in above paramater matches any of the username returned from above function
+    // we redirect the web page to /signup
+
+
+
     let salt = utils.createRandom32String();
 
     let newUser = {
