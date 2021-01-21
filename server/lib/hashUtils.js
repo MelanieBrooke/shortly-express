@@ -30,6 +30,8 @@ exports.compareHash = (attempted, stored, salt) => {
   return stored === this.createHash(attempted, salt);
 };
 
+
+
 /**
  * Creates a random 32 byte string.
  * @returns {string} A random string.

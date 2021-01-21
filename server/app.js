@@ -5,6 +5,8 @@ const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
+const _ = require('underscore');
+const db = require('./db');
 
 const app = express();
 
@@ -39,26 +41,92 @@ app.get('/login',
 
 app.post('/signup',
   (req, res) => {
-    console.log(' post request -> ', req.body);
-    var userName = req.body.username;
-    var password = req.body.password;
+    models.Users.create(req.body)
+      .then( (data) => {
+        if (data === 'exists') {
+          console.log('user exists');
+          res.set('location', '/signup');
+          res.render('signup');
+        } else {
+          console.log('user has been created');
+          res.set({'location': '/'});
+          res.render('index');
+        }
+      })
+      .catch( (err) => {
+        console.log('err -> ', err);
+      } );
+  });
+
+app.post('/login',
+  (req, res) => {
+    console.log('request -> ', req.body);
+
+    models.Users.getAll('users')
+      .then( (users) => {
+        var username = JSON.stringify(req.body.username);
+        var password = JSON.stringify(req.body.password);
+
+        var usernameExists = true;
+        users.forEach( (user) => {
+          if (user.username === username) { usernameExists = true; }
+        });
+
+        if (usernameExists) {
+          var salt;
+          var hashedPassword;
+          // getting salt
+          models.Users.getSalt(username)
+            .then( (data) => {
+              salt = data[0].salt;
+              return models.Users.getPassword(username);
+            } )
+            .then( (hashPass) => {
+              hashedPassword = hashPass[0].password;
+
+              return {'hashedPassword': hashedPassword, 'salt': salt};
+              // return hashedPassword;
+            } )
+            .then( (passAndSalt) => {
+              var matches = utils.compareHash(password, passAndSalt.hashedPassword, passAndSalt.salt);
 
 
-    models.Users.create(req.body);
-
-    // console.log('new user -> ', new models.Users);
-
-    // referce Models
-    // reference class desired using .method
-    // create new instance?
-
-    // take response data
-    // add data to database
+              console.log('matches -> ', matches);
+              // right in hematches -> r, matche
 
 
-    // something mysqlly
-    // res.render('signup');
-    res.end();
+              console.log('passAndSalt', passAndSalt);
+              console.log('original -> ', password);
+
+            })
+            .catch ( (err) => {
+              if (err) { console.log('err -> ', err); }
+            });
+
+          // getting hashed password
+
+
+          res.end();
+        } else {
+
+          res.end();
+          console.log('else');
+
+        }
+
+
+      });
+
+
+    // need make a get all fucntion
+    /*
+     handle log in first
+          if username and password match redirect to '/'
+     handle if user does not exist second
+           if username exists but password odes not match do refresh log in page '/login'
+     handle if password does not match third
+           if password does not match rerender  log in
+  */
 
   });
 

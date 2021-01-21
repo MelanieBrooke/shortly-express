@@ -44,51 +44,39 @@ class Users extends Model {
     return this.executeQuery(queryString);
   }
 
-
+  getPassword(name) {
+    let queryString = `select password from users where users.username = ${name}`;
+    return this.executeQuery(queryString);
+  }
+  getSalt(name) {
+    let queryString = `select salt from users where users.username = ${name}`;
+    return this.executeQuery(queryString);
+  }
 
 
 
   create({ username, password }) {
-
-
-
-    // check if user exists in database
-
-    // if user exists use window.location.replace("http://127.0.0.1:4568/signup");
-    // console.log('users -> ', Users);
-    //invoke getAll method on a usersTable
-
     console.log('this = ', this);
     console.log('username = ', username);
 
-
-    this.getAll('users')
+    return this.getAll('users')
       .then( (data) => {
-        console.log('data -> ', data);
-        // iterate over data
-        return data.forEach( (object) => {
-          if (username === object.username) {
-            $(location).attr('href', 'http://127.0.0.1:4568/signup');
-          }
-        });
-      });
-
-    // get usernma s from above function ^^^ somehow
-
-    // if username in above paramater matches any of the username returned from above function
-    // we redirect the web page to /signup
-
-
-
-    let salt = utils.createRandom32String();
-
-    let newUser = {
-      username,
-      salt,
-      password: utils.createHash(password, salt)
-    };
-
-    return super.create.call(this, newUser);
+        // console.log('data -> ', data);
+        var isNotDupe = _.every(data, function(obj) { return obj.username !== username; });
+        if (isNotDupe) {
+          let salt = utils.createRandom32String();
+          let newUser = {
+            username,
+            salt,
+            password: utils.createHash(password, salt)
+          };
+          return super.create.call(this, newUser);
+        } else {
+          console.log('duplicate user ');
+          return 'exists';
+        }
+      })
+      .catch ( (err) => console.log('err -> ', err) );
   }
 }
 
