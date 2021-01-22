@@ -57,67 +57,48 @@ app.post('/signup',
         console.log('err -> ', err);
       } );
   });
-
 app.post('/login',
   (req, res) => {
     console.log('request -> ', req.body);
-
     models.Users.getAll('users')
       .then( (users) => {
-        var username = JSON.stringify(req.body.username);
-        var password = JSON.stringify(req.body.password);
-
-        var usernameExists = true;
-        users.forEach( (user) => {
-          if (user.username === username) { usernameExists = true; }
-        });
-
+        var userStr = JSON.stringify(req.body.username);
+        var passStr = JSON.stringify(req.body.password);
+        var username = req.body.username;
+        var password = req.body.password;
+        var usernameExists = false;
+        users.forEach( (user) => { if (user.username === username) { usernameExists = true; } });
         if (usernameExists) {
           var salt;
           var hashedPassword;
-          // getting salt
-          models.Users.getSalt(username)
-            .then( (data) => {
+          models.Users.getSalt(userStr)
+            .then((data) => {
               salt = data[0].salt;
-              return models.Users.getPassword(username);
+              return models.Users.getPassword(userStr);
             } )
-            .then( (hashPass) => {
+            .then((hashPass) => {
               hashedPassword = hashPass[0].password;
-
               return {'hashedPassword': hashedPassword, 'salt': salt};
-              // return hashedPassword;
-            } )
-            .then( (passAndSalt) => {
+            })
+            .then((passAndSalt) => {
               var matches = utils.compareHash(password, passAndSalt.hashedPassword, passAndSalt.salt);
-
-
               console.log('matches -> ', matches);
-              // right in hematches -> r, matche
-
-
-              console.log('passAndSalt', passAndSalt);
-              console.log('original -> ', password);
-
+              if (matches) {
+                res.set({'location': '/'});
+                res.render('index');
+              } else {
+                res.set({'location': '/login'});
+                res.render('login');
+              }
             })
             .catch ( (err) => {
               if (err) { console.log('err -> ', err); }
             });
-
-          // getting hashed password
-
-
-          res.end();
-        } else {
-
-          res.end();
-          console.log('else');
-
+        } else if (!usernameExists) {
+          res.set({'location': '/login'});
+          res.render('index');
         }
-
-
       });
-
-
     // need make a get all fucntion
     /*
      handle log in first
