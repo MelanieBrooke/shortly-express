@@ -17,8 +17,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-
-
 app.get('/',
   (req, res) => {
     res.render('index');
@@ -44,11 +42,9 @@ app.post('/signup',
     models.Users.create(req.body)
       .then( (data) => {
         if (data === 'exists') {
-          console.log('user exists');
           res.set('location', '/signup');
           res.render('signup');
         } else {
-          console.log('user has been created');
           res.set({'location': '/'});
           res.render('index');
         }
@@ -60,7 +56,6 @@ app.post('/signup',
 //
 app.post('/login',
   (req, res) => {
-    console.log('request -> ', req.body);
     models.Users.getAll('users')
       .then( (users) => {
         var userStr = JSON.stringify(req.body.username);
@@ -83,7 +78,6 @@ app.post('/login',
             })
             .then((passAndSalt) => {
               var matches = utils.compareHash(password, passAndSalt.hashedPassword, passAndSalt.salt);
-              console.log('matches -> ', matches);
               if (matches) {
                 res.set({'location': '/'});
                 res.render('index');

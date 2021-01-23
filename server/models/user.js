@@ -56,8 +56,6 @@ class Users extends Model {
 
 
   create({ username, password }) {
-    console.log('this = ', this);
-    console.log('username = ', username);
 
     return this.getAll('users')
       .then( (data) => {
@@ -72,7 +70,6 @@ class Users extends Model {
           };
           return super.create.call(this, newUser);
         } else {
-          console.log('duplicate user ');
           return 'exists';
         }
       })

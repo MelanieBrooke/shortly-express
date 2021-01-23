@@ -5,7 +5,7 @@ const executeQuery = (query, values) => {
   return db.queryAsync(query, values).spread(results => results);
 };
 
-const parseData = options => {
+const parseData = (options) => {
   return _.reduce(options, (parsed, value, key) => {
     parsed.string.push(`${key} = ?`);
     parsed.values.push(value);
@@ -21,6 +21,14 @@ const parseData = options => {
 class Model {
   constructor(tablename) {
     this.tablename = tablename;
+  }
+
+  parseData(options) {
+    return _.reduce(options, (parsed, value, key) => {
+      parsed.string.push(`${key} = ?`);
+      parsed.values.push(value);
+      return parsed;
+    }, { string: [], values: [] });
   }
 
   /**
