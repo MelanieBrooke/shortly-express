@@ -3,19 +3,23 @@ const path = require('path');
 const utils = require('./lib/hashUtils');
 const partials = require('express-partials');
 const bodyParser = require('body-parser');
-const Auth = require('./middleware/auth');
+const Auth = require('./middleware/auth.js');
 const models = require('./models');
 const _ = require('underscore');
 const db = require('./db');
+
+
 
 const app = express();
 
 app.set('views', `${__dirname}/views`);
 app.set('view engine', 'ejs');
 app.use(partials());
+app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
+// app.use(Auth.createSession());
 
 app.get('/',
   (req, res) => {
@@ -56,6 +60,7 @@ app.post('/signup',
 //
 app.post('/login',
   (req, res) => {
+    Auth(req, res);
     models.Users.getAll('users')
       .then( (users) => {
         var userStr = JSON.stringify(req.body.username);

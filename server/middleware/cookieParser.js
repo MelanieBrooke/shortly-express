@@ -1,5 +1,7 @@
 var models = require('../models');
 var _ = require('lodash');
+
+
 const parseCookies = (req, res, next) => {
   var formatCookies = (string) => {
     var data = {};

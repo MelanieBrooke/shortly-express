@@ -378,6 +378,7 @@ describe('', function() {
 
         createSession(requestWithoutCookies, response, function() {
           var session = requestWithoutCookies.session;
+          // console.log('test -> ', requestWithoutCookies);
           expect(session).to.exist;
           expect(session).to.be.an('object');
           expect(session.hash).to.exist;

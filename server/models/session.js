@@ -1,6 +1,11 @@
 const utils = require('../lib/hashUtils');
 const Model = require('./model');
 const Users = require('./user');
+const db = require('../db');
+
+var executeQuery = (query, values) => {
+  return db.queryAsync(query, values).spread( (results) => results);
+};
 
 /**
  * Sessions is a class with methods to interact with the sessions table, which
@@ -12,6 +17,7 @@ class Sessions extends Model {
   constructor() {
     super('sessions');
   }
+
 
   /**
    * Determines if a session is associated with a logged in user.
@@ -44,6 +50,20 @@ class Sessions extends Model {
         });
       });
   }
+
+  getUserSession(hash) {
+    var hash = JSON.stringify(hash);
+    let queryString = `SELECT userId FROM sessions WHERE hash = ${hash}`;
+    return executeQuery(queryString);
+    // parse through our database looking for matching user id
+  }
+
+  getUsername(userid) {
+    // var userid = JSON.stringify(userid);
+    let queryString = `SELECT username FROM users WHERE id = ${userid}`;
+    return executeQuery(queryString);
+  }
+
 
   /**
    * Creates a new session. Within this function, a hash is randomly generated.
